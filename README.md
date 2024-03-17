@@ -33,7 +33,17 @@ To run the MyWallet app on your local machine, follow these steps:
 - Currency conversion from Euros (EUR) to British Pounds (GBP)
 
 ## Screenshots
+- Screenshot 1 - Welcome View
+  ![image](https://github.com/WMSShehara/MyWallet/assets/114556816/bc878219-15ab-4766-a0be-c298bda7d74e)
+
+-Screenshot2 - All transactions retrieve from database
 ![image](https://github.com/WMSShehara/MyWallet/assets/114556816/1287a0e5-76e3-402c-bbf4-534e6fd5987e)
-![image](https://github.com/WMSShehara/MyWallet/assets/114556816/1287a0e5-76e3-402c-bbf4-534e6fd5987e)
-![image](https://github.com/WMSShehara/MyWallet/assets/114556816/1287a0e5-76e3-402c-bbf4-534e6fd5987e)
-![image](https://github.com/WMSShehara/MyWallet/assets/114556816/1287a0e5-76e3-402c-bbf4-534e6fd5987e)
+
+-Screenshot3 - Add transaction
+![image](https://github.com/WMSShehara/MyWallet/assets/114556816/f081f1bb-56d7-42e2-afe8-426ddffe93a1)
+
+-Screenshot3 - Currency converter
+![image](https://github.com/WMSShehara/MyWallet/assets/114556816/e076e9d2-7ae3-4918-a532-c4423615c0b5)
+
+
+
