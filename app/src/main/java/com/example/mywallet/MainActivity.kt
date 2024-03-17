@@ -6,12 +6,17 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.mywallet.screens.HomeScreen
 import com.example.mywallet.ui.theme.MyWalletTheme
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mywallet.screens.CurrencyConverterScreen
+import com.example.mywallet.screens.ErrorScreen
+import com.example.mywallet.screens.LoadingScreen
+import java.util.Properties
+import com.example.mywallet.viewmodel.CurrencyViewModel
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,9 +28,11 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeScreen()
+                    NavigationController(context = LocalContext.current)
                 }
             }
         }
     }
 }
+
+

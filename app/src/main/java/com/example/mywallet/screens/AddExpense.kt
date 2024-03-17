@@ -2,6 +2,7 @@ package com.example.mywallet.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -19,20 +20,32 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.mywallet.R
+import com.example.mywallet.data.dao.ExpenseRepository
+import com.example.mywallet.data.model.EntityExpense
+import com.example.mywallet.viewmodel.AddExpenseViewModel
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
+import com.example.mywallet.data.WalletDB
+import com.example.mywallet.data.dao.ExpenseDao
+import com.example.mywallet.data.dao.ExpenseDaoImpl
+import com.example.mywallet.data.dao.ExpenseDao_Impl
 
 @Composable
-fun AddExpense() {
+fun AddExpense(addExpenseViewModel: AddExpenseViewModel, navController: NavController) {
     Surface(modifier= Modifier.fillMaxSize()) {
         ConstraintLayout (modifier=Modifier.fillMaxSize()) {
             val (nameRow, list, card, topbar) = createRefs()
@@ -53,11 +66,9 @@ fun AddExpense() {
                         end.linkTo(parent.end)
                     })
             {
-                Image(painter= painterResource(id = R.drawable.back), contentDescription = null,
-                    modifier = Modifier.align(Alignment.CenterStart)
-                )
+
                 Text(
-                    text = "Add Expense",
+                    text = "Add Transaction",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -66,8 +77,9 @@ fun AddExpense() {
                         .align(Alignment.Center)
 
                 )
-                Image(painter= painterResource(id = R.drawable.menu), contentDescription = null,
+                Image(painter= painterResource(id = R.drawable.home), contentDescription = null,
                     modifier = Modifier.align(Alignment.CenterEnd)
+                        .clickable { navController.navigate("welcome") }
                 )
             }
             DataForm(modifier = Modifier
@@ -76,56 +88,95 @@ fun AddExpense() {
                     top.linkTo(nameRow.bottom)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                })
+                },
+                addExpenseViewModel = addExpenseViewModel)
+
         }
 
     }
 }
 @Composable
-fun DataForm(modifier: Modifier){
-    Column(modifier = modifier
-        .padding(16.dp)
-        .fillMaxWidth()
-        .shadow(16.dp)
-        .clip(RoundedCornerShape(16.dp))
-        .background(Color.White)
-        .padding(16.dp)
-        .verticalScroll(rememberScrollState())
+fun DataForm(modifier: Modifier, addExpenseViewModel: AddExpenseViewModel) {
+    var titleText by remember { mutableStateOf("") }
+    var amountText by remember { mutableStateOf("") }
+    var dateText by remember { mutableStateOf("") }
+    var typeText by remember { mutableStateOf("") }
+    var descriptionText by remember { mutableStateOf("") }
+
+    Column(
+        modifier = modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+            .shadow(16.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White)
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
     ) {
         Text(text = "Type", fontSize = 14.sp, color = Color.Gray)
-        OutlinedTextField(value = "", onValueChange = {},
-            modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(
+            value = typeText,
+            onValueChange = { typeText = it },
+            modifier = Modifier.fillMaxWidth()
+        )
         Spacer(modifier = Modifier.height(16.dp))
         Text(text = "Title", fontSize = 14.sp, color = Color.Gray)
-        OutlinedTextField(value = "", onValueChange = {},
-            modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(
+            value = titleText,
+            onValueChange = { titleText = it },
+            modifier = Modifier.fillMaxWidth()
+        )
         Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "Amount", fontSize = 14.sp,color = Color.Gray)
-        OutlinedTextField(value = "", onValueChange = {},
-            modifier = Modifier.fillMaxWidth())
+        Text(text = "Amount", fontSize = 14.sp, color = Color.Gray)
+        OutlinedTextField(
+            value = amountText,
+            onValueChange = { amountText = it },
+            modifier = Modifier.fillMaxWidth()
+        )
         Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "Date", fontSize = 14.sp,color = Color.Gray)
-        OutlinedTextField(value = "", onValueChange = {},
-            modifier = Modifier.fillMaxWidth())
+        Text(text = "Date", fontSize = 14.sp, color = Color.Gray)
+        OutlinedTextField(
+            value = dateText,
+            onValueChange = { dateText = it },
+            modifier = Modifier.fillMaxWidth()
+        )
         Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "Description", fontSize = 14.sp,color = Color.Gray)
-        OutlinedTextField(value = "", onValueChange = {},
-            modifier = Modifier.fillMaxWidth())
+        Text(text = "Description", fontSize = 14.sp, color = Color.Gray)
+        OutlinedTextField(
+            value = descriptionText,
+            onValueChange = { descriptionText = it },
+            modifier = Modifier.fillMaxWidth()
+        )
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = { /*TODO*/ }, modifier = Modifier
-            .clip(RoundedCornerShape(2.dp))
-            .fillMaxWidth()
-        ){
-            Text(text = "Add Expense", fontSize = 14.sp)
+        Button(
+            onClick = {
+                val expense = EntityExpense(
+                    title = titleText,
+                    amount = amountText.toDouble(),
+                    date = dateText.toLong(),
+                    type = typeText,
+                    description = descriptionText
+                )
+                addExpenseViewModel.insertExpense(expense)
+            },
+            modifier = Modifier
+                .clip(RoundedCornerShape(2.dp))
+                .fillMaxWidth()
+        ) {
+            Text(text = "Confirm", fontSize = 14.sp)
+        }
+
     }
-
-
-
-    }
-
 }
-@Composable
-@Preview
+
+
+/*@Composable
+// @Preview
 fun PreviewAddIncome() {
-    AddExpense()
+    val context = LocalContext.current
+    val database = WalletDB.getInstance(context) // You need to provide the appropriate context here
+    val viewModel = AddExpenseViewModel(repository = ExpenseRepository(dao = ExpenseDaoImpl(database)))
+    AddExpense(addExpenseViewModel = viewModel)
 }
+*/
+

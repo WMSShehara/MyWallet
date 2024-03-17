@@ -2,6 +2,7 @@ package com.example.mywallet.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,15 +31,20 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.example.mywallet.R
-import com.example.mywallet.data.model.Entity
+import com.example.mywallet.data.model.EntityExpense
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.navigation.NavController
+
 import com.example.mywallet.ui.theme.PurpleX
 import com.example.mywallet.viewmodel.HomeViewModel
-import com.example.mywallet.viewmodel.HomeViewModelFactory
+import java.util.Date
 
 
 @Composable
-fun HomeScreen() {
-val viewModel:HomeViewModel = HomeViewModelFactory(LocalContext.current).create(HomeViewModel::class.java)
+fun HomeScreen(navController: NavController){
+
+val viewModel:HomeViewModel = HomeViewModel.HomeViewModelFactory(LocalContext.current).create(HomeViewModel::class.java)
     Surface(modifier = Modifier.fillMaxSize()) {
         ConstraintLayout {
             // Create references for the composables to constrain
@@ -65,16 +71,25 @@ val viewModel:HomeViewModel = HomeViewModelFactory(LocalContext.current).create(
                     }
             ) {
                 Column {
-                    Text(text = "Hello !", fontSize = 24.sp, color = Color.White)
+                    Text(text = "My Wallet", fontSize = 24.sp, color = Color.White)
                 }
                 Image(
-                    painter = painterResource(id = R.drawable.menu),
+                    painter = painterResource(id = R.drawable.home),
                     contentDescription = null,
                     modifier = Modifier.align(Alignment.CenterEnd)
+                        .clickable { navController.navigate("welcome") }
                 )
+               /* Button(
+                    onClick = { navController.navigate("welcome")},
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(2.dp))
+                        .fillMaxWidth()
+                ) {
+                    Text("Back")
+                }*/
 
             }
-        val state = viewModel.dao.collectAsState(initial= emptyList())
+        val state = viewModel.expenses.collectAsState(initial= emptyList())
             val expenses = viewModel.getTotalExpense(state.value)
             val income = viewModel.getTotalIncome(state.value)
             val balance = viewModel.getBalance(state.value)
@@ -95,9 +110,8 @@ val viewModel:HomeViewModel = HomeViewModelFactory(LocalContext.current).create(
                         end.linkTo(parent.end)
                         bottom.linkTo(parent.bottom)
                         height = Dimension.fillToConstraints
-                    },list = state.value
+                    }, list = state.value, viewModel = viewModel
             )
-
 
         }
     }
@@ -121,23 +135,17 @@ fun CardItem(modifier: Modifier, balance: String, income: String, expenses: Stri
                 .weight(1f))
                 {
              */
-                Column(
-                    //modifier = Modifier.align(Alignment.CenterStart)
-                ){
-                    Text(text = "Total Balance", fontSize = 16.sp, color = Color.Gray)
-                    Text(text = balance, fontSize = 20.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
-                }
+
+                    Text(text = "Total Balance", fontSize = 16.sp,color = Color.White)
+                    Text(text = balance, fontSize = 24.sp, fontWeight = FontWeight.Bold,color = Color.White)
+                    Spacer(modifier = Modifier.padding(20.dp))
 
                 Row(modifier = Modifier.fillMaxWidth()){
-                   // Box(modifier = Modifier
-                     //   .fillMaxWidth()
-                       // .weight(1f)) {
-                        Column(
-                            //modifier = Modifier.align(Alignment.CenterStart)
-                        ){
+
+                        Column{
                             Row{
                                 Image(
-                                    painter = painterResource(id = R.drawable.income),
+                                    painter = painterResource(id = R.drawable.income2),
                                     contentDescription = null
                                 )
                                 Spacer(modifier = Modifier.padding(4.dp))
@@ -152,7 +160,7 @@ fun CardItem(modifier: Modifier, balance: String, income: String, expenses: Stri
                         Column( modifier = Modifier.align(Alignment.CenterEnd)){
                             Row{
                                 Image(
-                                    painter = painterResource(id = R.drawable.expense),
+                                    painter = painterResource(id = R.drawable.expense1),
                                     contentDescription = null
                                 )
                                 Spacer(modifier = Modifier.padding(4.dp))
@@ -169,36 +177,30 @@ fun CardItem(modifier: Modifier, balance: String, income: String, expenses: Stri
 
 
 @Composable
-fun TransactionList(modifier: Modifier,list:List<Entity>){
-    LazyColumn(modifier = modifier.padding(horizontal=16.dp)){
-        item{
-        Box(modifier = Modifier.fillMaxWidth()){
-            Text(text = "Recent Transactions", fontSize = 20.sp, color = Color.Gray)
-            Text(
-                text = "View All",
-                fontSize = 16.sp,
-                color = Color.Gray,
-                modifier = Modifier.align(
-                    Alignment.CenterEnd
-                )
-            )
+fun TransactionList(modifier: Modifier, list: List<EntityExpense>, viewModel: HomeViewModel){
+    LazyColumn(modifier = modifier.padding(horizontal = 16.dp)) {
+        item {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Text(text = "All Transactions", fontSize = 20.sp, color = Color.Gray)
+
+            }
         }
-        }
-        /*items(list){ transaction->
+        items(list) { item ->
             TransactionItem(
-                title = transaction.title,
-                amount = "EUR ${transaction.amount}",
-                date = transaction.date.toString(),
-                icon = if (transaction.type == "Income") R.drawable.income else R.drawable.expense,
-                color = if (transaction.type == "Income") Color.Green else Color.Red
+                title = item.title,
+                amount = "EUR ${item.amount}",
+                icon = viewModel.getItemIcon(item),
+                date = item.date.toString(),
+                description = item.description
             )
-        }*/
+        }
 
     }
-
 }
-@Composable
-fun CardRowItem(modifier: Modifier, title:String, amount:String, icon:Int){
+
+
+/*@Composable
+fun CardRowItem(modifier: Modifier, title:String, amount:String, icon:Int, color: Color){
     Column(modifier = modifier){
         Row{
             Image(
@@ -211,9 +213,9 @@ fun CardRowItem(modifier: Modifier, title:String, amount:String, icon:Int){
         Text(text = amount, fontSize = 20.sp, color = Color.White)
     }
 
-}
+}*/
 @Composable
-fun TransactionItem(title:String, amount:String, date:String, icon:Int, color: Color){
+fun TransactionItem(title: String, amount: String, icon: Int, date: String,description:String){
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -226,17 +228,20 @@ fun TransactionItem(title:String, amount:String, date:String, icon:Int, color: C
             )
             Spacer(modifier = Modifier.padding(8.dp))
             Column{
-                Text(text = title, fontSize = 16.sp, color = color)
-                Text(text = date, fontSize = 12.sp, color = color)
+                Text(text = title, fontSize = 16.sp)
+                Text(text = date, fontSize = 12.sp)
+                Text(text =description, fontSize = 12.sp)
             }
         }
-        Text(text = amount, fontSize = 20.sp, color = color, modifier = Modifier.align(Alignment.CenterEnd))
+        Text(text = amount, fontSize = 20.sp,  modifier = Modifier.align(Alignment.CenterEnd))
     }
 }
 
 
+/*
 @Composable
 @Preview(showBackground = true)
 fun PreviewHomeScreen() {
     HomeScreen()
 }
+*/
