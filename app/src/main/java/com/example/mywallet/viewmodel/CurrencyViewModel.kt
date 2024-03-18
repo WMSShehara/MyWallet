@@ -7,7 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 
-import com.example.mywallet.data.model.ExchangeRatesApi
+// import com.example.mywallet.data.model.ExchangeRatesApi
 import kotlinx.coroutines.launch
 
 
@@ -23,14 +23,18 @@ class CurrencyViewModel : ViewModel() {
         eurInput = newValue
     }
 
-    fun convert() {
-        val euros = eurInput.toDoubleOrNull() ?: 0.0
-        gbp = euros * gpbRate
+    fun roundToDecimalPlace(number: Double, decimalPlaces: Int): Double {
+        val factor = Math.pow(10.0, decimalPlaces.toDouble())
+        return (number * factor).toLong() / factor
     }
 
-    init {
-        getExchangeRateForGpb()
+    fun convert() {
+        val euros = eurInput.toDoubleOrNull() ?: 0.0
+        euros.toFloat()
+        gbp = roundToDecimalPlace(euros * gpbRate, 2)
     }
+
+
 
 
     sealed interface ExchangeRatesUIState {
@@ -45,18 +49,23 @@ class CurrencyViewModel : ViewModel() {
     var exchangeRatesUIState by mutableStateOf<ExchangeRatesUIState>(ExchangeRatesUIState.Loading)
     private set
 
-    private fun getExchangeRateForGpb() {
+    init {
+        getExchangeRateForGpb()
+    }
+    fun getExchangeRateForGpb() {
         viewModelScope.launch {
-            var exchangeRatesApi: ExchangeRatesApi? = null
+            //var exchangeRatesApi: ExchangeRatesApi? = null
+
             try {
-                exchangeRatesApi = ExchangeRatesApi.getInstance(apiKey = "hVx1xmB0oGqEET6h4GLEA8VbPDBiruhH")
-                val exchangeRates = exchangeRatesApi!!.getRates(apiKey = "hVx1xmB0oGqEET6h4GLEA8VbPDBiruhH")
-                if (exchangeRates.success) {
-                    gpbRate = exchangeRates.rates.GBP
+                //exchangeRatesApi = ExchangeRatesApi.getInstance(apiKey = "hVx1xmB0oGqEET6h4GLEA8VbPDBiruhH")
+                //val exchangeRates = exchangeRatesApi!!.getRates(apiKey = "hVx1xmB0oGqEET6h4GLEA8VbPDBiruhH")
+                //if (exchangeRates.success) {
+                    gpbRate = 0.85f
+                //var exchangeRatesUIState by mutableStateOf<ExchangeRatesUIState>(ExchangeRatesUIState.Success)
                     exchangeRatesUIState = ExchangeRatesUIState.Success
-                } else {
-                    exchangeRatesUIState = ExchangeRatesUIState.Error
-                }
+                //} else {
+                    //exchangeRatesUIState = ExchangeRatesUIState.Error
+                //}
             } catch (e: Exception) {
                 gpbRate = 0.0f
                 exchangeRatesUIState = ExchangeRatesUIState.Error

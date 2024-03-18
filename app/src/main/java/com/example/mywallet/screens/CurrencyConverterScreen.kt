@@ -61,7 +61,7 @@ fun CurrencyConverterScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         Text(
-            text = stringResource(R.string.result,String.format("%.2f", gbp)).replace(',','.'),
+            text = "GBP: $gbp",
             modifier = Modifier.padding(start = 16.dp)
         )
         Button(
